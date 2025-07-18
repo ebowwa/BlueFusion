@@ -25,7 +25,7 @@ check_service() {
 start_api() {
     echo -e "${YELLOW}Starting API server...${NC}"
     cd "$(dirname "$0")"
-    python src/api/api_server.py &
+    python src/api/fastapi_server.py &
     API_PID=$!
     sleep 3
     
