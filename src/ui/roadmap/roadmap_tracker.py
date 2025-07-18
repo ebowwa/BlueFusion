@@ -16,7 +16,7 @@ ROADMAP_FEATURES = {
     },
     
     "Connection Management": {
-        "Auto-Connect Manager": {"status": "pending", "description": "Handle connection retries and stability"},
+        "Auto-Connect Manager": {"status": "completed", "description": "Handle connection retries and stability", "notes": "Implemented with configurable retry strategies (exponential/fixed/linear backoff), connection stability monitoring, metrics tracking, and WebSocket real-time updates. Features include pause/resume functionality, priority-based management, and comprehensive API endpoints. Located in src/interfaces/auto_connect_manager.py with demo in examples/auto_connect_demo.py"},
         "Connection Parameter Analyzer": {"status": "pending", "description": "Monitor intervals, latency, timeout"},
         "MTU Negotiator": {"status": "pending", "description": "Test different MTU sizes for data throughput"},
         "Multi-Device Synchronization": {"status": "partial", "description": "Control multiple peripherals"},

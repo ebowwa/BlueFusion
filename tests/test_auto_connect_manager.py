@@ -6,12 +6,13 @@ import asyncio
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from src.interfaces.auto_connect_manager import (
     AutoConnectManager,
     ConnectionConfig,
     ConnectionState,
+    ConnectionPriority,
     RetryStrategy,
     ManagedConnection,
     ConnectionMetrics
@@ -71,6 +72,13 @@ class MockBLEInterface(BLEInterface):
     
     async def discover_descriptors(self, address: str, char_uuid: str):
         return []
+    
+    async def read_characteristic(self, address: str, char_uuid: str) -> Optional[bytes]:
+        # Simulate successful read for health checks
+        return b"MockDevice"
+    
+    async def write_characteristic(self, address: str, char_uuid: str, data: bytes) -> bool:
+        return True
 
 
 class TestConnectionConfig:
@@ -423,6 +431,41 @@ class TestAutoConnectManager:
         await manager.stop()
         assert manager._running is False
         assert len(manager.connection_tasks) == 0
+        
+    def test_connection_priority(self, manager):
+        # Add devices with different priorities
+        high_priority_addr = "AA:BB:CC:DD:EE:FF"
+        medium_priority_addr = "11:22:33:44:55:66"
+        low_priority_addr = "77:88:99:AA:BB:CC"
+        
+        high_config = ConnectionConfig(priority=ConnectionPriority.HIGH)
+        medium_config = ConnectionConfig(priority=ConnectionPriority.MEDIUM)
+        low_config = ConnectionConfig(priority=ConnectionPriority.LOW)
+        
+        manager.add_managed_device(high_priority_addr, high_config)
+        manager.add_managed_device(medium_priority_addr, medium_config)
+        manager.add_managed_device(low_priority_addr, low_config)
+        
+        # Test priority comparison
+        assert manager._compare_priority(ConnectionPriority.HIGH, ConnectionPriority.MEDIUM) > 0
+        assert manager._compare_priority(ConnectionPriority.MEDIUM, ConnectionPriority.LOW) > 0
+        assert manager._compare_priority(ConnectionPriority.HIGH, ConnectionPriority.HIGH) == 0
+        
+    @pytest.mark.anyio
+    async def test_concurrent_connection_limit(self, manager):
+        # Set a low concurrent connection limit
+        manager.default_config.max_concurrent_connections = 2
+        
+        # Add multiple devices
+        addresses = ["AA:BB:CC:DD:EE:FF", "11:22:33:44:55:66", "77:88:99:AA:BB:CC"]
+        for addr in addresses:
+            manager.add_managed_device(addr)
+            
+        # Start priority connections
+        await manager._start_priority_connections()
+        
+        # Only 2 connections should be started
+        assert len(manager.connection_tasks) == 2
 
 
 if __name__ == "__main__":

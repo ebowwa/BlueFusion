@@ -209,6 +209,57 @@ class AutoConnectDemo:
                 print(f"  -> Timeout after {event['data'].get('timeout', 0)}s")
             elif event['event_type'] == 'stability_report':
                 print(f"  -> Stability report generated")
+    
+    async def show_analytics_report(self):
+        """Display comprehensive analytics report"""
+        print("\\n=== Connection Analytics Report ===")
+        
+        report = self.auto_connect_manager.generate_analytics_report()
+        
+        # Overall summary
+        print(f"\\nTimestamp: {report['timestamp']}")
+        print(f"Total Devices: {report['total_devices']}")
+        
+        # Connection states
+        print("\\nConnection States:")
+        for state, count in report['connection_states'].items():
+            if count > 0:
+                print(f"  {state}: {count}")
+        
+        # Overall metrics
+        metrics = report['overall_metrics']
+        print("\\nOverall Metrics:")
+        print(f"  Total Attempts: {metrics['total_attempts']}")
+        print(f"  Success Rate: {metrics['average_success_rate']:.2%}")
+        print(f"  Average Connection Time: {metrics['average_connection_time']:.2f}s")
+        print(f"  Total Uptime: {metrics['total_uptime']:.0f}s")
+        
+        # Priority distribution
+        print("\\nPriority Distribution:")
+        for priority, count in report['priority_distribution'].items():
+            if count > 0:
+                print(f"  {priority}: {count}")
+        
+        # Health status
+        print("\\nHealth Status:")
+        for status, count in report['health_status'].items():
+            if count > 0:
+                print(f"  {status}: {count}")
+        
+        # Device-specific details
+        print("\\nDevice Analytics:")
+        for address, analytics in report['device_analytics'].items():
+            print(f"\\n  Device: {address}")
+            print(f"    State: {analytics['state']}")
+            print(f"    Health Score: {analytics['health_score']:.1f}/100")
+            print(f"    Health Status: {analytics['health_status']}")
+            if analytics['recommendations']:
+                print("    Recommendations:")
+                for rec in analytics['recommendations']:
+                    print(f"      - {rec}")
+        
+        # Connection summary
+        print(f"\\nSummary: {self.auto_connect_manager.get_connection_summary()}")
                 
     async def cleanup(self):
         """Clean up resources"""
@@ -264,6 +315,9 @@ async def main():
         # Show event log
         await demo.show_event_log()
         
+        # Show analytics report
+        await demo.show_analytics_report()
+        
         print("\\n=== Demo Complete ===")
         print("The Auto-Connect Manager provides:")
         print("- Automatic connection retry with configurable strategies")
@@ -272,6 +326,10 @@ async def main():
         print("- Pause/resume functionality for problematic devices")
         print("- Comprehensive event logging and monitoring")
         print("- Per-device configuration for different connection requirements")
+        print("- Priority-based connection management")
+        print("- Active health checking with probing")
+        print("- Persistent state storage")
+        print("- Advanced analytics and health reporting")
         
     except KeyboardInterrupt:
         print("\\nDemo interrupted by user")

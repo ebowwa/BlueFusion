@@ -130,6 +130,16 @@ class BLEInterface(ABC):
         """Discover descriptors for a specific characteristic"""
         pass
     
+    @abstractmethod
+    async def read_characteristic(self, address: str, char_uuid: str) -> Optional[bytes]:
+        """Read value from a characteristic"""
+        pass
+    
+    @abstractmethod
+    async def write_characteristic(self, address: str, char_uuid: str, data: bytes) -> bool:
+        """Write value to a characteristic"""
+        pass
+    
     def register_callback(self, callback: Callable[[BLEPacket], None]) -> None:
         """Register a callback for packet events"""
         self._callbacks.append(callback)
