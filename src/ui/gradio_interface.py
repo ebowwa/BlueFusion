@@ -400,8 +400,13 @@ with gr.Blocks(title="BlueFusion BLE Monitor", theme=gr.themes.Soft()) as app:
         gr.Markdown("### 🔍 GATT Service Explorer")
         gr.Markdown("Explore BLE device services, characteristics, and descriptors")
         
-        # Service Explorer will be initialized on first use
-        gr.Markdown("Service Explorer interface will be loaded when needed.")
+        # Initialize and create Service Explorer interface
+        _, _, _, service_explorer_ui = ensure_initialized()
+        if service_explorer_ui:
+            # Create the interface and capture returned components
+            service_explorer_components = service_explorer_ui.create_interface()
+        else:
+            gr.Markdown("⚠️ Service Explorer initialization failed. Please refresh the page.")
     
     with gr.Tab("Packet Inspector"):
         gr.Markdown("### 🔍 Deep Packet Analysis")
